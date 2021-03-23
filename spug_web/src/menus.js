@@ -5,6 +5,7 @@
  */
 export default [
   {icon: 'desktop', title: '工作台', auth: 'home.home.view', path: '/home'},
+  {icon: 'cloud-server', title: '分支管理', auth: 'host.host.view', path: '/branch'},
   {icon: 'cloud-server', title: '主机管理', auth: 'host.host.view', path: '/host'},
   {
     icon: 'code', title: '批量执行', auth: 'exec.task.do|exec.template.view', child: [
@@ -40,5 +41,5 @@ export default [
       {title: '角色管理', auth: 'system.role.view', path: '/system/role'},
       {title: '系统设置', auth: 'system.setting.view', path: '/system/setting'},
     ]
-  },
+  }
 ]

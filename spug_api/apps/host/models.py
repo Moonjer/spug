@@ -2,9 +2,10 @@
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
 from django.db import models
-from libs import ModelMixin, human_datetime
+
 from apps.account.models import User
 from apps.setting.utils import AppSetting
+from libs import ModelMixin, human_datetime
 from libs.ssh import SSH
 
 
