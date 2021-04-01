@@ -6,5 +6,9 @@ from libs import json_response
 
 class BranchView(View):
     def get(self, request):
-        host_id = request.GET.get('id')
-        return json_response(Branch.objects.get(pk=host_id))
+        branch_id = request.GET.get('id')
+        if branch_id:
+            return json_response(Branch.objects.get(pk=branch_id))
+        branches = Branch.objects.filter(deleted_by_id__isnull=True)
+        return json_response({'branches': [x.to_dict() for x in branches]})
+
