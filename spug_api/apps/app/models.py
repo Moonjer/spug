@@ -1,21 +1,25 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
+import json
+
 from django.db import models
-from libs import ModelMixin, human_datetime
+from django.utils import timezone
+
 from apps.account.models import User
 from apps.config.models import Environment
-import json
+from libs import ModelMixin, human_datetime
 
 
 class App(models.Model, ModelMixin):
-    name = models.CharField(max_length=50)
-    key = models.CharField(max_length=50, unique=True)
-    desc = models.CharField(max_length=255, null=True)
+    name = models.CharField(max_length=50, db_column='app_name')
+    key = models.CharField(max_length=50, unique=True, db_column='app_key')
+    desc = models.CharField(max_length=255, null=True, db_column='app_description')
+    git_url = models.CharField(max_length=255, null=True)
     rel_apps = models.TextField(null=True)
     rel_services = models.TextField(null=True)
     sort_id = models.IntegerField(default=0, db_index=True)
-    created_at = models.CharField(max_length=20, default=human_datetime)
+    created_at = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def to_dict(self, *args, **kwargs):

@@ -5,7 +5,7 @@ from libs import ModelMixin
 
 
 class Branch(models.Model, ModelMixin):
-    project_id = models.IntegerField(max_length=5)
+    project_id = models.IntegerField()
     project_name = models.CharField(max_length=32)
     branch_name = models.CharField(max_length=50)
     sprint = models.CharField(max_length=50)

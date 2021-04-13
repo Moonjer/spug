@@ -32,6 +32,7 @@ class AppView(View):
             Argument('id', type=int, required=False),
             Argument('name', help='请输入服务名称'),
             Argument('key', help='请输入唯一标识符'),
+            Argument('git_url', help='请输入git地址'),
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:

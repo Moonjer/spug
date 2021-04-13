@@ -12,3 +12,7 @@ class BranchView(View):
         branches = Branch.objects.filter(deleted_by_id__isnull=True)
         return json_response({'branches': [x.to_dict() for x in branches]})
 
+
+def sync_branch_by_app(request):
+
+    return

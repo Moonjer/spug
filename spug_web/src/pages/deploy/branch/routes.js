@@ -1,4 +1,4 @@
-import { makeRoute } from "../../libs/router";
+import { makeRoute } from "../../../libs/router";
 import Index from './index';
 
 
