@@ -2,7 +2,7 @@ import json
 
 from django.http import HttpResponse
 
-from apps.branch.models import Branch
+from apps.git.models import Branch
 
 
 def get_hook(request):

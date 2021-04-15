@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'apps.app',
     'apps.deploy',
     'apps.notify',
-    'apps.branch'
+    'apps.git'
 ]
 
 MIDDLEWARE = [
@@ -122,6 +122,8 @@ USE_TZ = True
 AUTHENTICATION_EXCLUDES = (
     '/account/login/',
     re.compile('/apis/.*'),
+    # todo 测试开放权限
+    re.compile('/git/.*')
 )
 
 SPUG_VERSION = 'v2.3.15'
