@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'apps.app',
     'apps.deploy',
     'apps.notify',
-    'apps.git'
+    'apps.git',
+    'apps.jenkins'
 ]
 
 MIDDLEWARE = [
@@ -123,7 +124,8 @@ AUTHENTICATION_EXCLUDES = (
     '/account/login/',
     re.compile('/apis/.*'),
     # todo 测试开放权限
-    re.compile('/git/.*')
+    re.compile('/git/.*'),
+    re.compile('/jenkins/.*')
 )
 
 SPUG_VERSION = 'v2.3.15'

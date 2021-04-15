@@ -8,6 +8,8 @@ from django.utils import timezone
 
 from apps.account.models import User
 from apps.config.models import Environment
+from apps.git.models import Project
+from apps.jenkins.models import Job
 from libs import ModelMixin, human_datetime
 
 
@@ -15,11 +17,13 @@ class App(models.Model, ModelMixin):
     name = models.CharField(max_length=50, db_column='app_name')
     key = models.CharField(max_length=50, unique=True, db_column='app_key')
     desc = models.CharField(max_length=255, null=True, db_column='app_description')
-    git_url = models.CharField(max_length=255, null=True)
     rel_apps = models.TextField(null=True)
     rel_services = models.TextField(null=True)
     sort_id = models.IntegerField(default=0, db_index=True)
     created_at = models.DateTimeField(default=timezone.now)
+
+    git_repo = models.ForeignKey(Project, on_delete=models.PROTECT)
+    jenkins_job = models.ForeignKey(Job, on_delete=models.PROTECT)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def to_dict(self, *args, **kwargs):

@@ -1,16 +1,20 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from django.views.generic import View
-from django.db.models import F
-from django.conf import settings
-from libs import JsonParser, Argument, json_response
-from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
-from apps.config.models import Config
-from apps.app.utils import parse_envs, fetch_versions, remove_repo
-import subprocess
 import json
 import os
+import subprocess
+
+from django.conf import settings
+from django.db.models import F
+from django.views.generic import View
+
+from apps.app.models import App, Deploy, DeployExtend1, DeployExtend2
+from apps.app.utils import parse_envs, fetch_versions, remove_repo
+from apps.config.models import Config
+from apps.git.models import Project
+from apps.jenkins.models import Job
+from libs import JsonParser, Argument, json_response
 
 
 class AppView(View):
@@ -32,7 +36,8 @@ class AppView(View):
             Argument('id', type=int, required=False),
             Argument('name', help='请输入服务名称'),
             Argument('key', help='请输入唯一标识符'),
-            Argument('git_url', help='请输入git地址'),
+            Argument('git_repo_id', help='请输入git仓库'),
+            Argument('jenkins_job_id', help='请输入jenkins job'),
             Argument('desc', required=False)
         ).parse(request.body)
         if error is None:
@@ -44,6 +49,8 @@ class AppView(View):
                 App.objects.filter(pk=form.id).update(**form)
             else:
                 app = App.objects.create(created_by=request.user, **form)
+                app.git_repo = Project.objects.get(pk=form.git_repo_id)
+                app.jenkins_job = Job.objects.get(pk=form.jenkins_job_id)
                 app.sort_id = app.id
                 app.save()
                 if request.user.role:

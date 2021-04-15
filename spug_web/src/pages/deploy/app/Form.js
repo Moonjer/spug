@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import {observer} from 'mobx-react';
-import {Form, Input, message, Modal} from 'antd';
+import {Col, Form, Input, message, Modal, Select} from 'antd';
 import http from 'libs/http';
 import store from './store';
 
@@ -53,10 +53,27 @@ class ComForm extends React.Component {
                             <Input placeholder="请输入唯一标识符，例如：api_order"/>
                         )}
                     </Form.Item>
-                    <Form.Item required label="git地址">
-                        {getFieldDecorator('git_url', {initialValue: info['git_url']})(
-                            <Input placeholder="请输入git仓库地址"/>
-                        )}
+                    <Form.Item required label="git仓库">
+                        <Col span={16}>
+                            {getFieldDecorator('git_repo_id', {initialValue: info['git_repo_id']})(
+                                <Select placeholder="请选择对应仓库">
+                                    {store.gitProjects.map(item => (
+                                        <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                                    ))}
+                                </Select>
+                            )}
+                        </Col>
+                    </Form.Item>
+                    <Form.Item required label="jenkins job">
+                        <Col span={16}>
+                            {getFieldDecorator('jenkins_job_id', {initialValue: info['jenkins_job_id']})(
+                                <Select placeholder="请选择对应job">
+                                    {store.jenkinsJobs.map(item => (
+                                        <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>
+                                    ))}
+                                </Select>
+                            )}
+                        </Col>
                     </Form.Item>
                     <Form.Item label="备注信息">
                         {getFieldDecorator('desc', {initialValue: info['desc']})(

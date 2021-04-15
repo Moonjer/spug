@@ -9,3 +9,4 @@ GitPython==3.0.8
 python-ldap==3.2.0
 openpyxl==3.0.3
 python-gitlab==2.6.0
+python-jenkins==1.7.0

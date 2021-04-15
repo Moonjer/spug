@@ -14,6 +14,15 @@ class BranchView(View):
         return json_response({'branches': [x.to_dict() for x in branches]})
 
 
+class ProjectView(View):
+    def get(self, request):
+        project_id = request.GET.get('id')
+        if project_id:
+            return json_response()
+        projects = Project.objects.filter(deleted_by_id__isnull=True).order_by('name')
+        return json_response({'projects': [x.to_dict() for x in projects]})
+
+
 def sync_group(request):
     group_list_db = Group.objects.all()
     group_map_db = {}
