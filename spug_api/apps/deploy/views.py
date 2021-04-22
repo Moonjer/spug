@@ -1,23 +1,25 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from django.views.generic import View
-from django.db.models import F
+import json
+import os
+import subprocess
+import uuid
+from collections import defaultdict
+from datetime import datetime
+from threading import Thread
+
 from django.conf import settings
+from django.db.models import F
 from django.http.response import HttpResponseBadRequest
+from django.views.generic import View
 from django_redis import get_redis_connection
-from libs import json_response, JsonParser, Argument, human_datetime, human_time
-from apps.deploy.models import DeployRequest
+
 from apps.app.models import Deploy, DeployExtend2
+from apps.deploy.models import DeployRequest
 from apps.deploy.utils import deploy_dispatch, Helper
 from apps.host.models import Host
-from collections import defaultdict
-from threading import Thread
-from datetime import datetime
-import subprocess
-import json
-import uuid
-import os
+from libs import json_response, JsonParser, Argument, human_datetime, human_time
 
 
 class RequestView(View):
@@ -42,8 +44,8 @@ class RequestView(View):
             tmp['app_name'] = item.app_name
             tmp['app_extend'] = item.app_extend
             tmp['extra'] = json.loads(item.extra)
-            tmp['host_ids'] = json.loads(item.host_ids)
-            tmp['app_host_ids'] = json.loads(item.app_host_ids)
+            # tmp['host_ids'] = json.loads(item.host_ids)
+            # tmp['app_host_ids'] = json.loads(item.app_host_ids)
             tmp['status_alias'] = item.get_status_display()
             tmp['created_by_user'] = item.created_by_user
             data.append(tmp)
@@ -55,7 +57,7 @@ class RequestView(View):
             Argument('deploy_id', type=int, help='缺少必要参数'),
             Argument('name', help='请输申请标题'),
             Argument('extra', type=list, help='缺少必要参数'),
-            Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
+            # Argument('host_ids', type=list, filter=lambda x: len(x), help='请选择要部署的主机'),
             Argument('desc', required=False),
         ).parse(request.body)
         if error is None:
@@ -64,8 +66,8 @@ class RequestView(View):
                 return json_response(error='未找到该发布配置')
             if form.extra[0] == 'tag' and not form.extra[1]:
                 return json_response(error='请选择要发布的Tag')
-            if form.extra[0] == 'branch' and not form.extra[2]:
-                return json_response(error='请选择要发布的分支及Commit ID')
+            # if form.extra[0] == 'branch' and not form.extra[2]:
+            #     return json_response(error='请选择要发布的分支及Commit ID')
             if deploy.extend == '2':
                 if form.extra[0]:
                     form.extra[0] = form.extra[0].replace("'", '')
@@ -76,7 +78,7 @@ class RequestView(View):
             form.name = form.name.replace("'", '')
             form.status = '0' if deploy.is_audit else '1'
             form.extra = json.dumps(form.extra)
-            form.host_ids = json.dumps(form.host_ids)
+            # form.host_ids = json.dumps(form.host_ids)
             if form.id:
                 req = DeployRequest.objects.get(pk=form.id)
                 is_required_notify = deploy.is_audit and req.status == '-1'

@@ -65,7 +65,7 @@ class Deploy(models.Model, ModelMixin):
     def to_dict(self, *args, **kwargs):
         deploy = super().to_dict(*args, **kwargs)
         deploy['app_name'] = self.app_name if hasattr(self, 'app_name') else None
-        deploy['host_ids'] = json.loads(self.host_ids)
+        # deploy['host_ids'] = json.loads(self.host_ids)
         deploy['rst_notify'] = json.loads(self.rst_notify)
         deploy.update(self.extend_obj.to_dict())
         return deploy

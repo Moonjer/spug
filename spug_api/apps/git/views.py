@@ -51,3 +51,15 @@ def sync_project(request):
             project.save()
 
     return json_response()
+
+
+def sync_branch(request):
+    gw = GitWarehouse()
+
+    project_list = Project.objects.all()
+    for project in project_list:
+        branch_list_gw = gw.get_all_branch_by_project_id(project.id)
+
+        for branch_gw in branch_list_gw:
+            branch = Branch.objects.create(name=branch_gw.name, project=project)
+            branch.save()

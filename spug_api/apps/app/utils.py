@@ -1,12 +1,13 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from django.conf import settings
-from apps.app.models import Deploy
-from apps.setting.utils import AppSetting
-from libs.gitlib import Git
-import shutil
 import os
+import shutil
+
+from django.conf import settings
+
+from apps.app.models import Deploy, App
+from apps.git.models import Branch
 
 
 def parse_envs(text):
@@ -21,14 +22,8 @@ def parse_envs(text):
 
 
 def fetch_versions(deploy: Deploy):
-    git_repo = deploy.extend_obj.git_repo
-    repo_dir = os.path.join(settings.REPOS_DIR, str(deploy.id))
-    try:
-        pkey = AppSetting.get('private_key')
-    except KeyError:
-        pkey = None
-    with Git(git_repo, repo_dir, pkey) as git:
-        return git.fetch_branches_tags()
+    app = App.objects.filter(id=deploy.app_id).first()
+    return Branch.objects.filter(project_id=app.git_repo.id).all()
 
 
 def remove_repo(deploy_id):

@@ -31,8 +31,8 @@ class Project(models.Model, ModelMixin):
 
 
 class Branch(models.Model, ModelMixin):
-    branch = models.CharField(max_length=50, db_column='branch_name')
-    sprint = models.CharField(max_length=50)
+    name = models.CharField(max_length=128, db_column='branch_name')
+    sprint = models.CharField(max_length=50, db_column='sprint_name')
 
     project = models.ForeignKey(Project, on_delete=models.PROTECT)
     deleted_by = models.ForeignKey(User, models.PROTECT, related_name='+', null=True)

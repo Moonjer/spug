@@ -157,7 +157,16 @@ class ComTable extends React.Component {
                     <Table.Column width={260} title="操作" render={info => (
                         <Action>
                             <Action.Button auth="deploy.app.edit"
-                                           onClick={e => store.showExtForm(e, info.id)}>新建发布</Action.Button>
+                                           onClick={e => store.showExtForm(e, info.id, {
+                                                   extend: '1',
+                                                   git_type: 'branch',
+                                                   is_audit: false,
+                                                   rst_notify: {mode: '0'},
+                                                   versions: 10,
+                                                   host_ids: [undefined],
+                                                   filter_rule: {type: 'contain', data: ''}
+                                               }
+                                           )}>新建发布</Action.Button>
                             <Action.Button auth="deploy.app.edit"
                                            onClick={e => this.handleClone(e, info.id)}>克隆发布</Action.Button>
                             <Action.Button auth="deploy.app.edit"
