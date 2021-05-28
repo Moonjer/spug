@@ -166,8 +166,8 @@ class RequestDetailView(View):
         req = DeployRequest.objects.filter(pk=r_id).first()
         if not req:
             return json_response(error='未找到指定发布申请')
-        hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
-        targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
+        # hosts = Host.objects.filter(id__in=json.loads(req.host_ids))
+        # targets = [{'id': x.id, 'title': f'{x.name}({x.hostname}:{x.port})'} for x in hosts]
         server_actions, host_actions, outputs = [], [], []
         if req.deploy.extend == '2':
             server_actions = json.loads(req.deploy.extend_obj.server_actions)
@@ -185,7 +185,7 @@ class RequestDetailView(View):
             'status': req.status,
             'type': req.type,
             'status_alias': req.get_status_display(),
-            'targets': targets,
+            'targets': [],
             'server_actions': server_actions,
             'host_actions': host_actions,
             'outputs': outputs

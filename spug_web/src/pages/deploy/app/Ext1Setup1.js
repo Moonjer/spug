@@ -77,7 +77,7 @@ export default observer(function Ext1Setup1() {
                 <Button
                     type="primary"
                     disabled={!info.env_id}
-                    onClick={() => store.page += 2}>下一步</Button>
+                    onClick={() => store.page += 1}>下一步</Button>
             </Form.Item>
         </Form>
     )

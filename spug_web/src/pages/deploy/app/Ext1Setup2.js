@@ -44,33 +44,33 @@ class Ext1Setup2 extends React.Component {
         <Form.Item required label="目标主机仓库路径" help="此目录用于存储应用的历史版本，例如：/data/spug/repos">
           <Input disabled={store.isReadOnly} value={info['dst_repo']} onChange={e => info['dst_repo'] = e.target.value} placeholder="请输入目标主机仓库路径"/>
         </Form.Item>
-        <Form.Item required label="保留历史版本数量" help="早于指定数量的历史版本会被删除，以释放空间">
-          <Input disabled={store.isReadOnly} value={info['versions']} onChange={e => info['versions'] = e.target.value} placeholder="请输入保留历史版本数量"/>
-        </Form.Item>
-        <Form.Item required label="发布目标主机">
-          {info['host_ids'].map((id, index) => (
-            <React.Fragment key={index}>
-              <Select
-                value={id}
-                showSearch
-                placeholder="请选择"
-                disabled={store.isReadOnly}
-                style={{width: '80%', marginRight: 10}}
-                optionFilterProp="children"
-                filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
-                onChange={v => store.editHost(index, v)}>
-                {hostStore.records.filter(x => hasHostPermission(x.id)).map(item => (
-                  <Select.Option key={item.id} value={item.id} disabled={info['host_ids'].includes(item.id)}>
-                    {`${item.name}(${item['hostname']}:${item['port']})`}
-                  </Select.Option>
-                ))}
-              </Select>
-              {!store.isReadOnly && info['host_ids'].length > 1 && (
-                <Icon className={styles.delIcon} type="minus-circle-o" onClick={() => store.delHost(index)}/>
-              )}
-            </React.Fragment>
-          ))}
-        </Form.Item>
+        {/*<Form.Item required label="保留历史版本数量" help="早于指定数量的历史版本会被删除，以释放空间">*/}
+        {/*  <Input disabled={store.isReadOnly} value={info['versions']} onChange={e => info['versions'] = e.target.value} placeholder="请输入保留历史版本数量"/>*/}
+        {/*</Form.Item>*/}
+        {/*<Form.Item required label="发布目标主机">*/}
+        {/*  {info['host_ids'].map((id, index) => (*/}
+        {/*    <React.Fragment key={index}>*/}
+        {/*      <Select*/}
+        {/*        value={id}*/}
+        {/*        showSearch*/}
+        {/*        placeholder="请选择"*/}
+        {/*        disabled={store.isReadOnly}*/}
+        {/*        style={{width: '80%', marginRight: 10}}*/}
+        {/*        optionFilterProp="children"*/}
+        {/*        filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}*/}
+        {/*        onChange={v => store.editHost(index, v)}>*/}
+        {/*        {hostStore.records.filter(x => hasHostPermission(x.id)).map(item => (*/}
+        {/*          <Select.Option key={item.id} value={item.id} disabled={info['host_ids'].includes(item.id)}>*/}
+        {/*            {`${item.name}(${item['hostname']}:${item['port']})`}*/}
+        {/*          </Select.Option>*/}
+        {/*        ))}*/}
+        {/*      </Select>*/}
+        {/*      {!store.isReadOnly && info['host_ids'].length > 1 && (*/}
+        {/*        <Icon className={styles.delIcon} type="minus-circle-o" onClick={() => store.delHost(index)}/>*/}
+        {/*      )}*/}
+        {/*    </React.Fragment>*/}
+        {/*  ))}*/}
+        {/*</Form.Item>*/}
         <Form.Item wrapperCol={{span: 14, offset: 6}}>
           <Button disabled={store.isReadOnly} type="dashed" style={{width: '80%'}} onClick={store.addHost}>
             <Icon type="plus"/>添加目标主机

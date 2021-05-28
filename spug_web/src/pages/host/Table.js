@@ -60,10 +60,8 @@ class ComTable extends React.Component {
             showTotal: total => `共 ${total} 条`,
             pageSizeOptions: ['10', '20', '50', '100']
           }}>
-          <Table.Column title="类别" dataIndex="zone"/>
           <Table.Column title="主机名称" dataIndex="name" sorter={(a, b) => a.name.localeCompare(b.name)}/>
           <Table.Column title="连接地址" dataIndex="hostname" sorter={(a, b) => a.name.localeCompare(b.name)}/>
-          <Table.Column width={100} title="端口" dataIndex="port"/>
           <Table.Column ellipsis title="备注信息" dataIndex="desc"/>
           {hasPermission('host.host.edit|host.host.del|host.host.console') && (
             <Table.Column width={200} title="操作" render={info => (

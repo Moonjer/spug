@@ -1,21 +1,23 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from django.views.generic import View
+import socket
+
 from django.db.models import F
 from django.http.response import HttpResponseBadRequest
-from libs import json_response, JsonParser, Argument
-from apps.setting.utils import AppSetting
-from apps.host.models import Host
-from apps.app.models import Deploy
-from apps.schedule.models import Task
-from apps.monitor.models import Detection
-from apps.account.models import Role
-from libs.ssh import SSH, AuthenticationException
-from paramiko.ssh_exception import BadAuthenticationType
-from libs import human_datetime, AttrDict
+from django.views.generic import View
 from openpyxl import load_workbook
-import socket
+from paramiko.ssh_exception import BadAuthenticationType
+
+from apps.account.models import Role
+from apps.app.models import Deploy
+from apps.host.models import Host, Datacenter, Zone, DeviceVersion, OperatingSystem
+from apps.monitor.models import Detection
+from apps.schedule.models import Task
+from apps.setting.utils import AppSetting
+from libs import human_datetime, AttrDict
+from libs import json_response, JsonParser, Argument
+from libs.ssh import SSH, AuthenticationException
 
 
 class HostView(View):
@@ -26,26 +28,36 @@ class HostView(View):
                 return json_response(error='无权访问该主机，请联系管理员')
             return json_response(Host.objects.get(pk=host_id))
         hosts = Host.objects.filter(deleted_by_id__isnull=True)
-        zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
+        host_machines = Host.objects.filter(deleted_by_id__isnull=True, type__exact=1)
+        datacenters = [x.to_dict() for x in Datacenter.objects.all()]
+        zones = [x.to_dict() for x in Zone.objects.all()]
+        device_versions = [x.to_dict() for x in DeviceVersion.objects.all()]
+        operating_systems = [x.to_dict() for x in OperatingSystem.objects.all()]
         perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
-        return json_response({'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+
+        return json_response({'hosts': [x.to_dict() for x in hosts], 'datacenters': datacenters, 'zones': zones,
+                              'device_versions': device_versions,
+                              'operating_systems': operating_systems,
+                              'perms': perms, 'host_machines': [x.to_dict() for x in host_machines]})
 
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
+            Argument('type', type=int, help='请选择类型'),
+            Argument('datacenter', required=False, help='请选择机房'),
+            Argument('device_version', required=False, help='请选择型号'),
+            Argument('operating_system', required=False, help='请选择操作系统'),
+            Argument('host_machine', required=False, help='请选择宿主机'),
             Argument('zone', help='请输入主机类型'),
-            Argument('name', help='请输主机名称'),
-            Argument('username', handler=str.strip, help='请输入登录用户名'),
+            Argument('name', help='请输入主机名称'),
             Argument('hostname', handler=str.strip, help='请输入主机名或IP'),
-            Argument('port', type=int, help='请输入SSH端口'),
             Argument('pkey', required=False),
             Argument('desc', required=False),
-            Argument('password', required=False),
         ).parse(request.body)
         if error is None:
-            if valid_ssh(form.hostname, form.port, form.username, password=form.pop('password'),
-                         pkey=form.pkey) is False:
-                return json_response('auth fail')
+            # if valid_ssh(form.hostname, form.port, form.username, password=form.pop('password'),
+            #              pkey=form.pkey) is False:
+            #     return json_response('auth fail')
 
             if form.id:
                 Host.objects.filter(pk=form.pop('id')).update(**form)
