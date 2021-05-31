@@ -1,7 +1,6 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-import socket
 
 from django.db.models import F
 from django.http.response import HttpResponseBadRequest
@@ -114,6 +113,25 @@ def post_import(request):
     file = request.FILES['file']
     ws = load_workbook(file, read_only=True)['Sheet1']
     summary = {'invalid': [], 'skip': [], 'fail': [], 'network': [], 'repeat': [], 'success': [], 'error': []}
+
+    # 准备字典
+    datacenters = {}
+    for datacenter in Datacenter.objects.all():
+        datacenters[datacenter.name] = datacenter
+    zones = {}
+    for zone in Zone.objects.all():
+        zones[zone.name] = zone
+    host_type = {
+        '物理机': 1,
+        '虚拟机': 2
+    }
+    device_versions = {}
+    for device_version in DeviceVersion.objects.all():
+        device_versions[device_version.name] = device_version
+    operating_systems = {}
+    for operating_system in OperatingSystem.objects.all():
+        operating_systems[operating_system.name] = operating_system
+
     for i, row in enumerate(ws.rows):
         if i == 0:  # 第1行是表头 略过
             continue
@@ -121,32 +139,37 @@ def post_import(request):
             summary['invalid'].append(i)
             continue
         data = AttrDict(
-            zone=row[0].value,
-            name=row[1].value,
-            hostname=row[2].value,
-            port=row[3].value,
-            username=row[4].value,
-            password=row[5].value,
-            desc=row[6].value
+            name=row[0].value,
+            hostname=row[1].value,
+            datacenter=datacenters[row[2].value],
+            zone=zones[row[3].value],
+            type=host_type[row[4].value],
+            desc=row[8].value
         )
-        if Host.objects.filter(hostname=data.hostname, port=data.port, username=data.username,
-                               deleted_by_id__isnull=True).exists():
+        if data['type'] == 1:
+            data['device_version'] = device_versions[row[5].value]
+        else:
+            data['host_machine'] = Host.objects.get(name=row[6].value)
+            data['operating_system'] = operating_systems[row[7].value]
+        print(data)
+
+        if Host.objects.filter(hostname=data.hostname, deleted_by_id__isnull=True).exists():
             summary['skip'].append(i)
             continue
-        try:
-            if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password, None,
-                         False) is False:
-                summary['fail'].append(i)
-                continue
-        except AuthenticationException:
-            summary['fail'].append(i)
-            continue
-        except socket.error:
-            summary['network'].append(i)
-            continue
-        except Exception:
-            summary['error'].append(i)
-            continue
+        # try:
+        #     if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password, None,
+        #                  False) is False:
+        #         summary['fail'].append(i)
+        #         continue
+        # except AuthenticationException:
+        #     summary['fail'].append(i)
+        #     continue
+        # except socket.error:
+        #     summary['network'].append(i)
+        #     continue
+        # except Exception:
+        #     summary['error'].append(i)
+        #     continue
         if Host.objects.filter(name=data.name, deleted_by_id__isnull=True).exists():
             summary['repeat'].append(i)
             continue

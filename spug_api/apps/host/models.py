@@ -57,8 +57,8 @@ class Host(models.Model, ModelMixin):
     name = models.CharField(max_length=50)
     type = models.IntegerField()
     hostname = models.CharField(max_length=50)
-    port = models.IntegerField()
-    username = models.CharField(max_length=50)
+    port = models.IntegerField(null=True)
+    username = models.CharField(max_length=50, null=True)
     pkey = models.TextField(null=True)
     desc = models.CharField(max_length=255, null=True)
 
