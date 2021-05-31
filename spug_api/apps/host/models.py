@@ -61,6 +61,9 @@ class Host(models.Model, ModelMixin):
     username = models.CharField(max_length=50, null=True)
     pkey = models.TextField(null=True)
     desc = models.CharField(max_length=255, null=True)
+    cpu_core_num = models.IntegerField()
+    mem_num = models.IntegerField()
+    hard_disk = models.IntegerField()
 
     host_machine = models.ForeignKey("Host", models.PROTECT, related_name='+', null=True)
 

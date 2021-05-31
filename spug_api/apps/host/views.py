@@ -43,6 +43,9 @@ class HostView(View):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
             Argument('type', type=int, help='请选择类型'),
+            Argument('cpu_core_num', type=int, help='请输入cpu核数'),
+            Argument('mem_num', type=int, help='请输入内存大小'),
+            Argument('hard_disk', type=int, help='请输入硬盘大小'),
             Argument('datacenter', required=False, help='请选择机房'),
             Argument('device_version', required=False, help='请选择型号'),
             Argument('operating_system', required=False, help='请选择操作系统'),
@@ -143,15 +146,17 @@ def post_import(request):
             hostname=row[1].value,
             datacenter=datacenters[row[2].value],
             zone=zones[row[3].value],
-            type=host_type[row[4].value],
-            desc=row[8].value
+            cpu_core_num=row[4].value,
+            mem_num=row[5].value,
+            hard_disk=row[6].value,
+            type=host_type[row[7].value],
+            desc=row[11].value
         )
         if data['type'] == 1:
-            data['device_version'] = device_versions[row[5].value]
+            data['device_version'] = device_versions[row[8].value]
         else:
-            data['host_machine'] = Host.objects.get(name=row[6].value)
-            data['operating_system'] = operating_systems[row[7].value]
-        print(data)
+            data['host_machine'] = Host.objects.get(name=row[9].value)
+            data['operating_system'] = operating_systems[row[10].value]
 
         if Host.objects.filter(hostname=data.hostname, deleted_by_id__isnull=True).exists():
             summary['skip'].append(i)

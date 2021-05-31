@@ -195,6 +195,21 @@ class ComForm extends React.Component {
                             </Select>
                         )}
                     </Form.Item>
+                    <Form.Item required label="CPU">
+                        {getFieldDecorator('cpu_core_num', {initialValue: info['cpu_core_num']})(
+                            <Input addonAfter="核" placeholder="请输入cpu核数"/>
+                        )}
+                    </Form.Item>
+                    <Form.Item required label="内存">
+                        {getFieldDecorator('mem_num', {initialValue: info['mem_num']})(
+                            <Input addonAfter="G" placeholder="请输入内存大小"/>
+                        )}
+                    </Form.Item>
+                    <Form.Item required label="硬盘">
+                        {getFieldDecorator('hard_disk', {initialValue: info['hard_disk']})(
+                            <Input addonAfter="G" placeholder="请输入硬盘大小"/>
+                        )}
+                    </Form.Item>
                     <Form.Item label="类型">
                         <Radio.Group
                             value={hostType}
