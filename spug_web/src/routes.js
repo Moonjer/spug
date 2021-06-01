@@ -3,7 +3,7 @@
  * Copyright (c) <spug.dev@gmail.com>
  * Released under the AGPL-3.0 License.
  */
-import { makeModuleRoute } from "./libs/router";
+import {makeModuleRoute} from "./libs/router";
 
 import welcomeRoues from './pages/welcome/routes';
 import homeRoutes from './pages/home/routes';
@@ -18,14 +18,14 @@ import deployRoutes from './pages/deploy/routes';
 
 
 export default [
-  makeModuleRoute('/welcome', welcomeRoues),
-  makeModuleRoute('/home', homeRoutes),
-  makeModuleRoute('/host', hostRoutes),
-  makeModuleRoute('/system', systemRoutes),
-  makeModuleRoute('/exec', execRoutes),
-  makeModuleRoute('/schedule', scheduleRoutes),
-  makeModuleRoute('/monitor', monitorRoutes),
-  makeModuleRoute('/alarm', alarmRoutes),
-  makeModuleRoute('/config', configRoutes),
-  makeModuleRoute('/deploy', deployRoutes),
+    makeModuleRoute('/welcome', welcomeRoues),
+    makeModuleRoute('/home', homeRoutes),
+    makeModuleRoute('/host', hostRoutes),
+    makeModuleRoute('/system', systemRoutes),
+    makeModuleRoute('/exec', execRoutes),
+    makeModuleRoute('/schedule', scheduleRoutes),
+    makeModuleRoute('/monitor', monitorRoutes),
+    makeModuleRoute('/alarm', alarmRoutes),
+    makeModuleRoute('/config', configRoutes),
+    makeModuleRoute('/deploy', deployRoutes),
 ]

@@ -17,7 +17,7 @@ export default observer(function () {
         <SearchForm.Item span={6} title="主机类别">
           <Select allowClear placeholder="请选择" value={store.f_zone} onChange={v => store.f_zone = v}>
             {store.zones.map(item => (
-              <Select.Option value={item} key={item}>{item}</Select.Option>
+              <Select.Option value={item['id']} key={item['id']}>{item['name']}</Select.Option>
             ))}
           </Select>
         </SearchForm.Item>

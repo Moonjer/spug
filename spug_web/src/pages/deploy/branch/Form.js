@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import {observer} from 'mobx-react';
-import {Button, Form, Input, message, Modal, Radio, Select, Upload} from 'antd';
+import {Button, Form, Input, message, Modal, Upload} from 'antd';
 import {http, X_TOKEN} from 'libs';
 import store from './store';
 
@@ -20,15 +20,10 @@ class ComForm extends React.Component {
             addZone: null,
             fileList: [],
             editZone: store.record.zone,
-            hostType: 2
         }
     }
 
     componentDidMount() {
-        if (store.record.id) {
-            this.setState({hostType: store.record.type})
-        }
-
         if (store.record.pkey) {
             this.setState({
                 fileList: [{uid: '0', name: '独立密钥', data: store.record.pkey}]
@@ -40,7 +35,6 @@ class ComForm extends React.Component {
         this.setState({loading: true});
         const formData = this.props.form.getFieldsValue();
         formData['id'] = store.record.id;
-        formData['type'] = this.state.hostType;
         const file = this.state.fileList[0];
         if (file && file.data) formData['pkey'] = file.data;
         http.post('/api/host/', formData)
@@ -154,14 +148,14 @@ class ComForm extends React.Component {
 
     render() {
         const info = store.record;
-        const {fileList, loading, uploading, hostType} = this.state;
+        const {fileList, loading, uploading} = this.state;
         const {getFieldDecorator} = this.props.form;
         return (
             <Modal
                 visible
                 width={800}
                 maskClosable={false}
-                title={store.record.id ? '编辑主机' : '新建主机'}
+                title={store.record.id ? '编辑分支' : '新建分支'}
                 okText="验证"
                 onCancel={() => store.formVisible = false}
                 confirmLoading={loading}
@@ -172,88 +166,23 @@ class ComForm extends React.Component {
                             <Input placeholder="请输入主机名称"/>
                         )}
                     </Form.Item>
-                    <Form.Item required label="主机地址">
-                        {getFieldDecorator('hostname', {initialValue: info['hostname']})(
-                            <Input placeholder="请输入主机名/IP"/>
-                        )}
-                    </Form.Item>
-                    <Form.Item required label="机房">
-                        {getFieldDecorator('datacenter', {initialValue: info['datacenter_id']})(
-                            <Select placeholder="请选择机房">
-                                {store.datacenters.map(item => (
-                                    <Select.Option value={item['id']} key={item['id']}>{item['name']}</Select.Option>
-                                ))}
-                            </Select>
-                        )}
-                    </Form.Item>
-                    <Form.Item required label="环境">
-                        {getFieldDecorator('zone', {initialValue: info['zone_id']})(
-                            <Select placeholder="请选择环境">
-                                {store.zones.map(item => (
-                                    <Select.Option value={item['id']} key={item['id']}>{item['name']}</Select.Option>
-                                ))}
-                            </Select>
-                        )}
-                    </Form.Item>
-                    <Form.Item required label="CPU">
-                        {getFieldDecorator('cpu_core_num', {initialValue: info['cpu_core_num']})(
-                            <Input addonAfter="核" placeholder="请输入cpu核数"/>
-                        )}
-                    </Form.Item>
-                    <Form.Item required label="内存">
-                        {getFieldDecorator('mem_num', {initialValue: info['mem_num']})(
-                            <Input addonAfter="G" placeholder="请输入内存大小"/>
-                        )}
-                    </Form.Item>
-                    <Form.Item required label="硬盘">
-                        {getFieldDecorator('hard_disk', {initialValue: info['hard_disk']})(
-                            <Input addonAfter="G" placeholder="请输入硬盘大小"/>
-                        )}
-                    </Form.Item>
-                    <Form.Item label="类型">
-                        <Radio.Group
-                            value={hostType}
-                            style={{marginBottom: 8}}
-                            buttonStyle="solid"
-                            onChange={e => this.setState({hostType: e.target.value})}>
-                            <Radio.Button value={1}>物理机</Radio.Button>
-                            <Radio.Button value={2}>虚拟机</Radio.Button>
-                        </Radio.Group>
-                    </Form.Item>
-                    <div style={{display: hostType === 1 ? 'block' : 'none'}}>
-                        <Form.Item label="型号">
-                            {getFieldDecorator('device_version', {initialValue: info['device_version_id']})(
-                                <Select placeholder="请选择型号">
-                                    {store.deviceVersions.map(item => (
-                                        <Select.Option value={item['id']}
-                                                       key={item['id']}>{item['name']}</Select.Option>
-                                    ))}
-                                </Select>
+                    <Form.Item required label="连接地址" style={{marginBottom: 0}}>
+                        <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
+                            {getFieldDecorator('username', {initialValue: info['username']})(
+                                <Input addonBefore="ssh" placeholder="用户名"/>
                             )}
                         </Form.Item>
-                    </div>
-                    <div style={{display: hostType === 2 ? 'block' : 'none'}}>
-                        <Form.Item label="宿主机">
-                            {getFieldDecorator('host_machine', {initialValue: info['host_machine_id']})(
-                                <Select placeholder="请选择宿主机">
-                                    {store.hostMachines.map(item => (
-                                        <Select.Option value={item['id']}
-                                                       key={item['id']}>{item['name']}</Select.Option>
-                                    ))}
-                                </Select>
+                        <Form.Item style={{display: 'inline-block', width: 'calc(40%)'}}>
+                            {getFieldDecorator('hostname', {initialValue: info['hostname']})(
+                                <Input addonBefore="@" placeholder="主机名/IP"/>
                             )}
                         </Form.Item>
-                        <Form.Item label="操作系统">
-                            {getFieldDecorator('operating_system', {initialValue: info['operating_system_id']})(
-                                <Select placeholder="请选择操作系统">
-                                    {store.operatingSystems.map(item => (
-                                        <Select.Option value={item['id']}
-                                                       key={item['id']}>{item['name']}</Select.Option>
-                                    ))}
-                                </Select>
+                        <Form.Item style={{display: 'inline-block', width: 'calc(30%)'}}>
+                            {getFieldDecorator('port', {initialValue: info['port']})(
+                                <Input addonBefore="-p" placeholder="端口"/>
                             )}
                         </Form.Item>
-                    </div>
+                    </Form.Item>
                     <Form.Item label="独立密钥" extra="默认使用全局密钥，如果上传了独立密钥则优先使用该密钥。">
                         <Upload name="file" fileList={fileList} headers={{'X-Token': X_TOKEN}}
                                 beforeUpload={this.handleUpload}

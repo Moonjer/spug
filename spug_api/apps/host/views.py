@@ -1,21 +1,22 @@
 # Copyright: (c) OpenSpug Organization. https://github.com/openspug/spug
 # Copyright: (c) <spug.dev@gmail.com>
 # Released under the AGPL-3.0 License.
-from django.views.generic import View
+
 from django.db.models import F
 from django.http.response import HttpResponseBadRequest
-from libs import json_response, JsonParser, Argument
-from apps.setting.utils import AppSetting
-from apps.host.models import Host
-from apps.app.models import Deploy
-from apps.schedule.models import Task
-from apps.monitor.models import Detection
-from apps.account.models import Role
-from libs.ssh import SSH, AuthenticationException
-from paramiko.ssh_exception import BadAuthenticationType
-from libs import human_datetime, AttrDict
+from django.views.generic import View
 from openpyxl import load_workbook
-import socket
+from paramiko.ssh_exception import BadAuthenticationType
+
+from apps.account.models import Role
+from apps.app.models import Deploy
+from apps.host.models import Host, Datacenter, Zone, DeviceVersion, OperatingSystem
+from apps.monitor.models import Detection
+from apps.schedule.models import Task
+from apps.setting.utils import AppSetting
+from libs import human_datetime, AttrDict
+from libs import json_response, JsonParser, Argument
+from libs.ssh import SSH, AuthenticationException
 
 
 class HostView(View):
@@ -26,26 +27,39 @@ class HostView(View):
                 return json_response(error='无权访问该主机，请联系管理员')
             return json_response(Host.objects.get(pk=host_id))
         hosts = Host.objects.filter(deleted_by_id__isnull=True)
-        zones = [x['zone'] for x in hosts.order_by('zone').values('zone').distinct()]
+        host_machines = Host.objects.filter(deleted_by_id__isnull=True, type__exact=1)
+        datacenters = [x.to_dict() for x in Datacenter.objects.all()]
+        zones = [x.to_dict() for x in Zone.objects.all()]
+        device_versions = [x.to_dict() for x in DeviceVersion.objects.all()]
+        operating_systems = [x.to_dict() for x in OperatingSystem.objects.all()]
         perms = [x.id for x in hosts] if request.user.is_supper else request.user.host_perms
-        return json_response({'zones': zones, 'hosts': [x.to_dict() for x in hosts], 'perms': perms})
+
+        return json_response({'hosts': [x.to_dict() for x in hosts], 'datacenters': datacenters, 'zones': zones,
+                              'device_versions': device_versions,
+                              'operating_systems': operating_systems,
+                              'perms': perms, 'host_machines': [x.to_dict() for x in host_machines]})
 
     def post(self, request):
         form, error = JsonParser(
             Argument('id', type=int, required=False),
+            Argument('type', type=int, help='请选择类型'),
+            Argument('cpu_core_num', type=int, help='请输入cpu核数'),
+            Argument('mem_num', type=int, help='请输入内存大小'),
+            Argument('hard_disk', type=int, help='请输入硬盘大小'),
+            Argument('datacenter', required=False, help='请选择机房'),
+            Argument('device_version', required=False, help='请选择型号'),
+            Argument('operating_system', required=False, help='请选择操作系统'),
+            Argument('host_machine', required=False, help='请选择宿主机'),
             Argument('zone', help='请输入主机类型'),
-            Argument('name', help='请输主机名称'),
-            Argument('username', handler=str.strip, help='请输入登录用户名'),
+            Argument('name', help='请输入主机名称'),
             Argument('hostname', handler=str.strip, help='请输入主机名或IP'),
-            Argument('port', type=int, help='请输入SSH端口'),
             Argument('pkey', required=False),
             Argument('desc', required=False),
-            Argument('password', required=False),
         ).parse(request.body)
         if error is None:
-            if valid_ssh(form.hostname, form.port, form.username, password=form.pop('password'),
-                         pkey=form.pkey) is False:
-                return json_response('auth fail')
+            # if valid_ssh(form.hostname, form.port, form.username, password=form.pop('password'),
+            #              pkey=form.pkey) is False:
+            #     return json_response('auth fail')
 
             if form.id:
                 Host.objects.filter(pk=form.pop('id')).update(**form)
@@ -102,6 +116,25 @@ def post_import(request):
     file = request.FILES['file']
     ws = load_workbook(file, read_only=True)['Sheet1']
     summary = {'invalid': [], 'skip': [], 'fail': [], 'network': [], 'repeat': [], 'success': [], 'error': []}
+
+    # 准备字典
+    datacenters = {}
+    for datacenter in Datacenter.objects.all():
+        datacenters[datacenter.name] = datacenter
+    zones = {}
+    for zone in Zone.objects.all():
+        zones[zone.name] = zone
+    host_type = {
+        '物理机': 1,
+        '虚拟机': 2
+    }
+    device_versions = {}
+    for device_version in DeviceVersion.objects.all():
+        device_versions[device_version.name] = device_version
+    operating_systems = {}
+    for operating_system in OperatingSystem.objects.all():
+        operating_systems[operating_system.name] = operating_system
+
     for i, row in enumerate(ws.rows):
         if i == 0:  # 第1行是表头 略过
             continue
@@ -109,32 +142,39 @@ def post_import(request):
             summary['invalid'].append(i)
             continue
         data = AttrDict(
-            zone=row[0].value,
-            name=row[1].value,
-            hostname=row[2].value,
-            port=row[3].value,
-            username=row[4].value,
-            password=row[5].value,
-            desc=row[6].value
+            name=row[0].value,
+            hostname=row[1].value,
+            datacenter=datacenters[row[2].value],
+            zone=zones[row[3].value],
+            cpu_core_num=row[4].value,
+            mem_num=row[5].value,
+            hard_disk=row[6].value,
+            type=host_type[row[7].value],
+            desc=row[11].value
         )
-        if Host.objects.filter(hostname=data.hostname, port=data.port, username=data.username,
-                               deleted_by_id__isnull=True).exists():
+        if data['type'] == 1:
+            data['device_version'] = device_versions[row[8].value]
+        else:
+            data['host_machine'] = Host.objects.get(name=row[9].value)
+            data['operating_system'] = operating_systems[row[10].value]
+
+        if Host.objects.filter(hostname=data.hostname, deleted_by_id__isnull=True).exists():
             summary['skip'].append(i)
             continue
-        try:
-            if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password, None,
-                         False) is False:
-                summary['fail'].append(i)
-                continue
-        except AuthenticationException:
-            summary['fail'].append(i)
-            continue
-        except socket.error:
-            summary['network'].append(i)
-            continue
-        except Exception:
-            summary['error'].append(i)
-            continue
+        # try:
+        #     if valid_ssh(data.hostname, data.port, data.username, data.pop('password') or password, None,
+        #                  False) is False:
+        #         summary['fail'].append(i)
+        #         continue
+        # except AuthenticationException:
+        #     summary['fail'].append(i)
+        #     continue
+        # except socket.error:
+        #     summary['network'].append(i)
+        #     continue
+        # except Exception:
+        #     summary['error'].append(i)
+        #     continue
         if Host.objects.filter(name=data.name, deleted_by_id__isnull=True).exists():
             summary['repeat'].append(i)
             continue

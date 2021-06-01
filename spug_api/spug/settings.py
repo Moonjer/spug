@@ -29,7 +29,7 @@ SECRET_KEY = 'vk0do47)egwzz!uk49%(y3s(fpx4+ha@ugt-hcv&%&d@hwr&p7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'apps.app',
     'apps.deploy',
     'apps.notify',
+    'apps.git',
+    'apps.jenkins'
 ]
 
 MIDDLEWARE = [
@@ -121,6 +123,9 @@ USE_TZ = True
 AUTHENTICATION_EXCLUDES = (
     '/account/login/',
     re.compile('/apis/.*'),
+    # todo 测试开放权限
+    re.compile('/git/.*'),
+    re.compile('/jenkins/.*')
 )
 
 SPUG_VERSION = 'v2.3.16'
