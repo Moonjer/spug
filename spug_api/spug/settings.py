@@ -128,7 +128,7 @@ AUTHENTICATION_EXCLUDES = (
     re.compile('/jenkins/.*')
 )
 
-SPUG_VERSION = 'v2.3.15'
+SPUG_VERSION = 'v2.3.16'
 
 # override default config
 try:
