@@ -207,7 +207,16 @@ def fetch_host_extend(ssh):
         elif index == 3:
             response['os_name'] = line
         else:
-            response['disk'].append(round(int(line) / 1024 / 1024 / 1024, 0))
+            # If user does not has sudo privilege, 
+            # when executes 'fdisk' command,
+            # will return 'fdisk: command not found'
+            # and raise an exception.
+            if 'command not found' in line:
+                response['disk'].append('Permission denied')
+            elif line.isdigit():
+                response['disk'].append(round(int(line) / 1024 / 1024 / 1024, 0))
+            else:
+                response['disk'].append(line)
     return response
 
 
