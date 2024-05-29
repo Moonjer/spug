@@ -117,6 +117,7 @@ Push Assistant is a message push platform that integrates multiple channels such
 <div >
    <img src="https://cdn.spug.cc/img/spug-club.jpg" width = "300" height = "300" alt="spug-qq" align=center />
 <div>
-  
+ 
+ 
 ## License & Copyright
 [AGPL-3.0](https://opensource.org/licenses/AGPL-3.0)
